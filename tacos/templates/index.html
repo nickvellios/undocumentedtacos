@@ -1,0 +1,702 @@
+{{ define "index" }}
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:fb="http://ogp.me/ns/fb#">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
+		<meta property="og:image" content="https://undocumentedtacos.com/assets/img/food.jpg" />
+		<meta property="og:title" content="Undocumented Tacos - Food Truck Tracker" />
+		<meta property="og:url" content="https://undocumentedtacos.com" />
+		<meta property="og:description" content="Crowdsourced food truck locating service.  Track down the best unlisted eateries your city has to offer." />
+		<title>Undocumented Tacos</title>
+		<!-- CSS  -->
+		<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+		<link href="/assets/css/materialize.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+		<link href="/assets/css/style.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+        <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicons/apple-touch-icon.png">
+        <link rel="icon" type="image/png" href="/assets/img/favicons/favicon-32x32.png" sizes="32x32">
+        <link rel="icon" type="image/png" href="/assets/img/favicons/favicon-16x16.png" sizes="16x16">
+        <link rel="manifest" href="/assets/img/favicons/manifest.json">
+        <link rel="mask-icon" href="/assets/img/favicons/safari-pinned-tab.svg" color="#5bbad5">
+        <meta name="theme-color" content="#ffffff">
+	</head>
+    <style>
+    @font-face {
+        font-family: Laslocuras;
+        src: url(/assets/fonts/laslocuras.ttf);
+    }
+    #map {
+    	height: 75%;
+        width: 100%;
+        display: none;
+    }
+    .map {
+        height: 600px;
+    }
+    #map_placeholder {
+        height: 600px;
+    }
+    html, body {
+    	height: 100%;
+    }
+    body {
+        background-image: url(/assets/img/food.jpg);
+        background-size: 100%;
+        background-repeat: no-repeat;
+        background-color: #fff;
+    }
+    .main_logo {
+        font-family: Laslocuras;
+    }
+    .title_text {
+        text-shadow: 2px 2px 2px #000;
+    }
+    @media (min-width: 1024px) {
+        footer {
+            background-image: url(/assets/img/taco_wh_trans.svg);
+            background-repeat:no-repeat;
+            background-size:contain;
+            background-position: left bottom;
+            width:100%;
+            margin:0 auto;
+        }
+    }
+
+	@media (max-width: 590px) {
+		#taco_logo {
+			display: none;
+		}
+	}
+	#progress_outer {
+		display: none;
+	}
+	.main_loader {
+		padding-top:5px;
+	}
+	.modal-content {
+		padding: 8px 0px 0px 0px !important;
+	}
+	.modal.bottom-sheet {
+		max-height: 100% !important;
+	}
+    </style>
+	<body class="light-green darken-1">
+		<nav class="light-green lighten" role="navigation">
+			<div class="nav-wrapper container">
+				<img src="/assets/img/taco_wh_trans.svg" height="70px" id="taco_logo"><a id="logo-container" href="/" class="brand-logo main_logo">Undocumented Tacos</a>
+				<ul class="right hide-on-med-and-down">
+					<li><a href="https://github.com/nickvellios" target="_blank">Contact</a></li>
+				</ul>
+				<ul id="nav-mobile" class="side-nav">
+					<li><a href="https://github.com/nickvellios" target="_blank">Contact</a></li>
+				</ul>
+				<a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
+			</div>
+		</nav>
+		<div class="section no-pad-bot" id="index-banner">
+			<div class="container">
+				<h3 class="header center white-text title_text header_text">Find A Food Truck Near You</h3>
+				<div class="row center">
+                    <button data-target="report-modal" class="btn-large waves-effect waves-light light-green">Log a new taco truck sighting</button>
+				</div>
+			</div>
+		</div>
+        <div class="center-align orange main_loader" id="loader">
+            <div class="row center-align">
+                <div class="preloader-wrapper large active">
+                    <div class="spinner-layer spinner-green-only">
+                        <div class="circle-clipper left">
+                            <div class="circle"></div>
+                        </div>
+                        <div class="gap-patch">
+                            <div class="circle"></div>
+                        </div>
+                        <div class="circle-clipper right">
+                            <div class="circle"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="map" class="s12">[Map]</div>
+        <div id="map_placeholder" class="s12"></div>
+		<footer class="page-footer light-green" id="page-footer">
+			<div class="container">
+				<div class="row">
+					<div class="col s12">
+						<h5 class="white-text">About</h5>
+						<p class="grey-text text-lighten-4">Undocumented Tacos was created by <a href="https://github.com/nickvellios" target="_blank" class="lime-text lighten-5">Nick Vellios</a>, a self-proclaimed taco truck connoisseur, as a way to find and enjoy taco trucks around the state of California.  It can be hard to find taco trucks because most are not listed on Google Businesses, Yelp, Yellowpages etc. hence the <em>undocumented</em> portion of the name.</p>
+                        <p class="grey-text text-lighten-4">This is a crowdsourced project so please help by adding your favorite taco truck.  I also encourage you to add other food trucks and even hard to find brick and mortar hole in the wall eateries.  Undocumented Tacos is powered by the <a href="https://golang.org/" target="_blank" class="lime-text lighten-5">Go programming language.</a></p>
+					</div>
+				</div>
+			</div>
+			<div class="footer-copyright">
+				<div class="container">
+					Copyright © 2017 Undocumented Tacos, all rights reserved®
+				</div>
+			</div>
+		</footer>
+
+        <!-- Modal Structure -->
+        <div id="report-modal" class="modal bottom-sheet light-green darken-1">
+        	<div class="modal-content">
+        		<h5 class="white-text center-align">Report a taco truck sighting</h5>
+                <div class="row">
+                    <div class="col m3"></div>
+                    <div class="col s12 l6">
+                        <div class="card">
+                            <div class="card-image center-align">
+                                <img id="photo_preview" src="#" alt="" style="display:none;width:100%;max-width:600px;max-height:300px;" />
+                                <span class="card-title"></span>
+                                <div class="file-field input-field">
+                                    <div class="btn-floating halfway-fab waves-effect waves-light red" id="add_photo_button" style="display:none;">
+                                        <i class="material-icons">perm_media</i>
+                                        <input id="photo_input" type="file" accept="image/*" capture="camera">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-content">
+                                <div class="input-field col s12">
+                                    <input id="truck_name" type="text" class="validate">
+                                    <label for="truck_name">Truck Name</label>
+                                </div>
+                                <p>To submit a taco truck sighting, enter the name and send a photo.  Your current location will be used.</p>
+								<div class="progress" id="progress_outer">
+									<div class="determinate" style="width: 0%" id="progress_bar"></div>
+								</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col m3"></div>
+                </div>
+        	</div>
+        	<div class="modal-footer light-green darken-2">
+        		<a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">Close</a>
+        	</div>
+        </div>
+		<!--  Scripts-->
+		<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+		<script src="/assets/js/materialize.js"></script>
+		<script src="/assets/js/init.js"></script>
+		<script src="/assets/js/toasts.js"></script>
+        <script>
+		var refreshMap = null;
+		var current_loc = null;
+        $(document).ready(function() {
+            $('#report-modal').modal();
+
+            function sendPic() {
+				if (navigator.geolocation) {
+					if (current_loc != null) {
+		                var photo_input = document.getElementById('photo_input');
+
+						var file = photo_input.files[0];
+					    var fd = new FormData();
+					    fd.append("afile", file);
+						fd.append("name", $('#truck_name').val());
+						fd.append("lat", current_loc.coords.latitude);
+						fd.append("lng", current_loc.coords.longitude);
+					    var xhr = new XMLHttpRequest();
+					    xhr.open('POST', '/addtruck', true);
+
+						$('#progress_outer').css('display', 'block');
+
+					    xhr.upload.onprogress = function(e) {
+					        if (e.lengthComputable) {
+					            var percentComplete = (e.loaded / e.total) * 100;
+					            console.log(percentComplete + '% uploaded');
+								$('#progress_bar').css('width', percentComplete + '%');
+					        }
+					    };
+					    xhr.onload = function() {
+					        if (this.status == 200) {
+					            var resp = JSON.parse(this.response);
+					            console.log('Server got:', resp);
+								$('#report-modal').modal('close');
+								$('#truck_name').val('');
+								$('#progress_outer').css('display', 'none');
+								Materialize.toast('Thanks, your submission is appreciated!', 4000);
+								refreshMap(current_loc.coords.latitude, current_loc.coords.longitude);
+					        } else {
+								Materialize.toast('Oops, something went wrong.', 4000);
+							};
+					    };
+					    xhr.send(fd);
+					}
+				}
+                // Send file here either by adding it to a `FormData` object
+                // and sending that via XHR, or by simply passing the file into
+                // the `send` method of an XHR instance.
+            }
+            function loadPhotoPreview(input) {
+                if (input.files && input.files[0]) {
+                    var reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        $('#photo_preview').attr('src', e.target.result);
+                    }
+
+                    reader.readAsDataURL(input.files[0]);
+                }
+
+                $('#photo_preview').css('display', 'inline');
+            }
+            $('#photo_input').change(function(){
+                sendPic();
+            });
+
+            $('#truck_name').keyup(function() {
+                if ($(this).val().length) {
+                    $('#add_photo_button').css('display', 'inline');
+                } else {
+                    $('#add_photo_button').css('display', 'none');
+                }
+            });
+        });
+
+        var map;
+        var base_color = "#F00";
+        var base_color_light = "#F66";
+        var select_color = "#0A0";
+        var select_color_light = "#6A6";
+		var infowindow = null;
+        var truck_list = [];
+
+		function CenterControl(controlDiv, map) {
+			// Set CSS for the control border.
+			var controlUI = document.createElement('div');
+			controlUI.style.backgroundColor = '#fff';
+			controlUI.style.border = '2px solid #fff';
+			controlUI.style.borderRadius = '3px';
+			controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
+			controlUI.style.cursor = 'pointer';
+			controlUI.style.marginBottom = '22px';
+			controlUI.style.textAlign = 'center';
+			controlUI.title = 'Click to recenter the map';
+			controlDiv.appendChild(controlUI);
+
+			// Set CSS for the control interior.
+			var controlText = document.createElement('div');
+			controlText.style.color = 'rgb(25,25,25)';
+			controlText.style.fontFamily = 'Roboto,Arial,sans-serif';
+			controlText.style.fontSize = '16px';
+			controlText.style.lineHeight = '38px';
+			controlText.style.paddingLeft = '5px';
+			controlText.style.paddingRight = '5px';
+			controlText.innerHTML = 'Center Map';
+			controlUI.appendChild(controlText);
+
+			// Setup the click event listeners: simply set the map to Chicago.
+			controlUI.addEventListener('click', function() {
+				map.setCenter(new google.maps.LatLng(current_loc.coords.latitude, current_loc.coords.longitude));
+			});
+		}
+
+		function truck_here(id, ishere) {
+			var jqxhr = $.post( "/sighting/" + id + "/" + ishere, function() {
+				Materialize.toast('Thanks, your feedback is appreciated!', 4000);
+			})
+			.done(function() {
+			})
+			.fail(function() {
+				Materialize.toast('Oops, something went wrong!', 4000);
+			})
+			.always(function() {
+				infowindow.close();
+			});
+		}
+
+		function vote(id, v) {
+			var jqxhr = $.post( "/rate/" + id + "/" + v, function() {
+				Materialize.toast('Thanks, your feedback is appreciated!', 4000);
+			})
+			.done(function() {
+			})
+			.fail(function() {
+				Materialize.toast('Oops, something went wrong!', 4000);
+			})
+			.always(function() {
+				infowindow.close();
+			});
+		}
+
+		function flag_truck(id) {
+			var jqxhr = $.post( "/flag/" + id, function() {
+				Materialize.toast('Thanks, your feedback is appreciated!', 4000);
+			})
+			.done(function() {
+			})
+			.fail(function() {
+				Materialize.toast('Oops, something went wrong!', 4000);
+			})
+			.always(function() {
+				infowindow.close();
+			});
+		}
+
+        function initMap() {
+        	map = new google.maps.Map(document.getElementById('map'), {
+                scrollwheel: false,
+                /*center: {lat: pos.location.lat, lng: pos.location.lng},*/
+                center: {lat: 37.773923, lng: -122.348361},
+        	    zoom: 11, // 1: World, 5: Landmass/continent, 10: City, 15: Streets, 20: Buildings
+                styles: [{
+                        "elementType": "geometry",
+                        "stylers": [{
+                            "color": "#ebe3cd"
+                        }]
+                    },
+                    {
+                        "elementType": "labels.text.fill",
+                        "stylers": [{
+                            "color": "#523735"
+                        }]
+                    },
+                    {
+                        "elementType": "labels.text.stroke",
+                        "stylers": [{
+                            "color": "#f5f1e6"
+                        }]
+                    },
+                    {
+                        "featureType": "administrative",
+                        "elementType": "geometry.stroke",
+                        "stylers": [{
+                            "color": "#c9b2a6"
+                        }]
+                    },
+                    {
+                        "featureType": "administrative.land_parcel",
+                        "elementType": "geometry.stroke",
+                        "stylers": [{
+                            "color": "#dcd2be"
+                        }]
+                    },
+                    {
+                        "featureType": "administrative.land_parcel",
+                        "elementType": "labels.text.fill",
+                        "stylers": [{
+                            "color": "#ae9e90"
+                        }]
+                    },
+                    {
+                        "featureType": "landscape.natural",
+                        "elementType": "geometry",
+                        "stylers": [{
+                            "color": "#dfd2ae"
+                        }]
+                    },
+                    {
+                        "featureType": "poi",
+                        "elementType": "geometry",
+                        "stylers": [{
+                            "color": "#dfd2ae"
+                        }]
+                    },
+                    {
+                        "featureType": "poi",
+                        "elementType": "labels.text.fill",
+                        "stylers": [{
+                            "color": "#93817c"
+                        }]
+                    },
+                    {
+                        "featureType": "poi.park",
+                        "elementType": "geometry.fill",
+                        "stylers": [{
+                            "color": "#a5b076"
+                        }]
+                    },
+                    {
+                        "featureType": "poi.park",
+                        "elementType": "labels.text.fill",
+                        "stylers": [{
+                            "color": "#447530"
+                        }]
+                    },
+                    {
+                        "featureType": "road",
+                        "elementType": "geometry",
+                        "stylers": [{
+                            "color": "#f5f1e6"
+                        }]
+                    },
+                    {
+                        "featureType": "road.arterial",
+                        "elementType": "geometry",
+                        "stylers": [{
+                            "color": "#fdfcf8"
+                        }]
+                    },
+                    {
+                        "featureType": "road.highway",
+                        "elementType": "geometry",
+                        "stylers": [{
+                            "color": "#f8c967"
+                        }]
+                    },
+                    {
+                        "featureType": "road.highway",
+                        "elementType": "geometry.stroke",
+                        "stylers": [{
+                            "color": "#e9bc62"
+                        }]
+                    },
+                    {
+                        "featureType": "road.highway.controlled_access",
+                        "elementType": "geometry",
+                        "stylers": [{
+                            "color": "#e98d58"
+                        }]
+                    },
+                    {
+                        "featureType": "road.highway.controlled_access",
+                        "elementType": "geometry.stroke",
+                        "stylers": [{
+                            "color": "#db8555"
+                        }]
+                    },
+                    {
+                        "featureType": "road.local",
+                        "elementType": "labels.text.fill",
+                        "stylers": [{
+                            "color": "#806b63"
+                        }]
+                    },
+                    {
+                        "featureType": "transit.line",
+                        "elementType": "geometry",
+                        "stylers": [{
+                            "color": "#dfd2ae"
+                        }]
+                    },
+                    {
+                        "featureType": "transit.line",
+                        "elementType": "labels.text.fill",
+                        "stylers": [{
+                            "color": "#8f7d77"
+                        }]
+                    },
+                    {
+                        "featureType": "transit.line",
+                        "elementType": "labels.text.stroke",
+                        "stylers": [{
+                            "color": "#ebe3cd"
+                        }]
+                    },
+                    {
+                        "featureType": "transit.station",
+                        "elementType": "geometry",
+                        "stylers": [{
+                            "color": "#dfd2ae"
+                        }]
+                    },
+                    {
+                        "featureType": "water",
+                        "elementType": "geometry.fill",
+                        "stylers": [{
+                            "color": "#b9d3c2"
+                        }]
+                    },
+                    {
+                        "featureType": "water",
+                        "elementType": "labels.text.fill",
+                        "stylers": [{
+                            "color": "#92998d"
+                        }]
+                    }
+                ]
+        	});
+
+			var homeInfoWindow = new google.maps.InfoWindow({map: map});
+			infowindow = new google.maps.InfoWindow({map: map});
+			infowindow.close();
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+					current_loc = position;
+					$('#map').css('display', 'block');
+					$('#map_placeholder').css('display', 'none');
+					$('#loader').css('display', 'none');
+					google.maps.event.trigger(map, 'resize');
+
+					map.setCenter({
+						lat: position.coords.latitude,
+						lng: position.coords.longitude
+					});
+
+
+					refreshMap = function(lat, lng) {
+						var bounds = map.getBounds();
+						var center = bounds.getCenter();
+						var ne = bounds.getNorthEast();
+						// r = radius of the earth in statute miles
+						var r = 3963.0;
+						// Convert lat or lng from decimal degrees into radians (divide by 57.2958)
+						var lat1 = center.lat() / 57.2958;
+						var lon1 = center.lng() / 57.2958;
+						var lat2 = ne.lat() / 57.2958;
+						var lon2 = ne.lng() / 57.2958;
+						// distance = circle radius from center to Northeast corner of bounds
+						var radius = r * Math.acos(Math.sin(lat1) * Math.sin(lat2) + Math.cos(lat1) * Math.cos(lat2) * Math.cos(lon2 - lon1));
+						$.getJSON("/trucks/" + lat + "/" + lng + "/" + radius, function(response) {
+							if (response.data == null) {
+								return;
+							}
+							if (!response.error.length && response.data.length) {
+								for (var i = 0; i < response.data.length; i++) {
+									var exists = false;
+									truck_list.forEach(function(truck, index) {
+										if (truck.id == response.data[i].id) {
+											exists = true;
+											truck.marker.setMap(null);
+										}
+									});
+
+									if (!exists) {
+										truck_list.push(
+												{
+													id: response.data[i].id,
+													lat: response.data[i].lat,
+													lng: response.data[i].lng,
+													ext: response.data[i].ext,
+													name: response.data[i].name,
+													last_updated: response.data[i].last_updated,
+													marker: null,
+													selected: false,
+													listenerHandle: null
+												}
+										);
+									}
+								}
+								truck_list.forEach(function(truck, index) {
+					        		var marker = new google.maps.Marker({
+					        			position: { lat: truck.lat, lng: truck.lng },
+					        			map: map,
+					        			title: truck.id.toString(),
+					        			label: "",
+					                    infoWindow: infowindow
+					        		});
+
+									marker.addListener('click', function() {
+					                    infowindow.close(map, marker);
+					                    infowindow = new google.maps.InfoWindow({
+					                        content: '<div id="content">'+
+					                                '<div id="siteNotice">'+
+					                                '</div>'+
+					                                '<h6 id="firstHeading" class="firstHeading">' + truck.name + '</h6>'+
+					                                '<div class="center-align" id="bodyContent">'+
+					                                '<img style="max-width:200px; max-height:100px;" src="/assets/img/ul/' + truck.id + truck.ext + '">' +
+					                                '<p>Last sighting: ' + truck.last_updated + '<br>'+
+					                                'Is this truck here now?</p>'+
+					                                '<a href="#" class="btn" onclick="truck_here(' + truck.id + ', 1); return false;">Yes</a>&nbsp;<a href="#" class="btn" onclick="truck_here(' + truck.id + ', 0); return false;">No</a><br><br><a href="#" onclick="vote(' + truck.id + ', 1); return false;"><i class="small material-icons">thumb_up</i></a>&nbsp;&nbsp;<a href="#" onclick="vote(' + truck.id + ', 0); return false;"><i class="small material-icons">thumb_down</i></a><br><hr><a href="#" onclick="flag_truck(' + truck.id + '); return false;">Report</a>'+
+					                                '</div>'+
+					                                '</div>'
+					                    });
+
+					                    infowindow.open(map, marker);
+					        			if (truck.selected) {
+					        				truck.selected = false;
+					                        infowindow.close(map, marker);
+					        			} else {
+					        				truck.selected = true;
+					        			}
+					        		});
+
+					        		truck.marker = marker;
+					        	});
+							}
+						});
+					}
+
+					refreshMap(position.coords.latitude, position.coords.longitude);
+
+					var pos = {
+						lat: position.coords.latitude,
+						lng: position.coords.longitude
+					};
+
+					google.maps.event.trigger(map, 'resize');
+					homeInfoWindow.setPosition(pos);
+					homeInfoWindow.setContent('You are here');
+
+					var currentPositionMarker = new google.maps.Marker({
+						position: pos,
+						map: map,
+						title: "truck.name",
+						label: "",
+						infoWindow: homeInfoWindow,
+						icon: {
+							path: google.maps.SymbolPath.CIRCLE,
+							fillColor: '#BBBBFF',
+							fillOpacity: 0.7,
+							strokeColor: '#000',
+							strokeWeight: 2,
+							scale: 10,
+						}
+					});
+					updatePosition();
+
+					function updatePosition() {
+						if (currentPositionMarker != null) {
+							var watchid = navigator.geolocation.watchPosition(function(ps) {
+								current_loc = ps;
+								currentPositionMarker.setPosition(new google.maps.LatLng(ps.coords.latitude, ps.coords.longitude));
+								homeInfoWindow.setPosition(new google.maps.LatLng(ps.coords.latitude, ps.coords.longitude));
+								console.log('Position Updated');
+							}, function error(err) {
+								console.log(err.message);
+							}, options = {
+								enableHighAccuracy: true,
+								timeout: 5000,
+								maximumAge: 0
+							});
+						}
+					}
+
+					var centerControlDiv = document.createElement('div');
+					var centerControl = new CenterControl(centerControlDiv, map);
+
+					centerControlDiv.index = 1;
+					map.controls[google.maps.ControlPosition.TOP_CENTER].push(centerControlDiv);
+                }, function() {
+                    $('#loader').html('<h4 class="orange-text title_text">Please turn on location services and refresh the page.</h4>');
+                    handleLocationError(true, infowindow, map.getCenter());
+                });
+            } else {
+                // Browser doesn't support Geolocation
+                $('#loader').html('<h4 class="orange-text title_text">Your browser does not support geolocation.</h4>');
+                handleLocationError(false, infowindow, map.getCenter());
+            }
+
+            google.maps.event.trigger(map, 'resize');
+
+			map.addListener('dragend', function() {
+				if (refreshMap) {
+					var center_coords = map.getCenter();
+
+					refreshMap(center_coords.lat(), center_coords.lng());
+				}
+			});
+			map.addListener('zoom_changed', function() {
+				if (refreshMap) {
+					var center_coords = map.getCenter();
+
+					refreshMap(center_coords.lat(), center_coords.lng());
+				}
+			});
+        }
+
+        </script>
+		<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
+		<script>
+			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+			ga('create', 'UA-91622711-1', 'auto');
+			ga('send', 'pageview');
+		</script>
+	</body>
+</html>
+
+{{ end }}
